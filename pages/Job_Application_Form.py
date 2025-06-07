@@ -11,14 +11,22 @@ from oauth2client.service_account import ServiceAccountCredentials
 import uuid
 import re
 import io
+from dotenv import load_dotenv
+import os
 
+# Load environment variables
+load_dotenv()
+
+# Streamlit page configuration
 st.set_page_config(page_title="HR Automation Portal - Application", layout="wide")
 
+# Google Sheets and Drive setup
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 CREDS = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", SCOPE)
 CLIENT = gspread.authorize(CREDS)
-SHEET = CLIENT.open_by_key("1ELd_iiUv_QW5iqhrFdDeloXRvtOwEOdvwxbJc1pa7YI")
+SHEET = CLIENT.open_by_key(os.getenv("GOOGLE_SHEET_ID"))
 
+# Fetch job description from Google Sheet
 try:
     jd_worksheet = SHEET.worksheet("Job_Description")
 except gspread.exceptions.WorksheetNotFound:
@@ -119,7 +127,7 @@ def upload_pdf_to_drive(file, filename):
         body={
             'type': 'user',
             'role': 'reader',
-            'emailAddress': 'your-email@example.com'  # Replace with your actual Google account email
+            'emailAddress': os.getenv("RESUME_ACCESS_EMAIL")
         }
     ).execute()
     return file.get('webViewLink')
@@ -139,8 +147,10 @@ def save_to_google_sheets(data, pdf_link):
         pdf_link
     ])
 
+# Streamlit UI
 st.title("HR Automation Portal - Data Analyst Intern Application")
 
+# Navigation buttons
 st.header("Navigation")
 col1, col2 = st.columns(2)
 with col1:
