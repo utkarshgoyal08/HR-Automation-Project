@@ -3,14 +3,22 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 import plotly.express as px
+from dotenv import load_dotenv
+import os
 
+# Load environment variables
+load_dotenv()
+
+# Streamlit page configuration
 st.set_page_config(page_title="HR Portal - Dashboard", layout="wide")
 
+# Google Sheets setup
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 CREDS = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", SCOPE)
 CLIENT = gspread.authorize(CREDS)
-SHEET = CLIENT.open_by_key("1ELd_iiUv_QW5iqhrFdDeloXRvtOwEOdvwxbJc1pa7YI")
+SHEET = CLIENT.open_by_key(os.getenv("GOOGLE_SHEET_ID"))
 
+# Initialize Job Description worksheet
 try:
     jd_worksheet = SHEET.worksheet("Job_Description")
 except gspread.exceptions.WorksheetNotFound:
@@ -54,6 +62,7 @@ with col2:
     if st.button("Return to Home"):
         st.switch_page("app.py")
 
+# Job Description Management
 st.header("Manage Job Description")
 current_jd = jd_worksheet.get('A1')[0][0]
 jd_input = st.text_area("Edit Job Description", value=current_jd, height=300)
@@ -61,6 +70,7 @@ if st.button("Update Job Description"):
     jd_worksheet.update_cell(1, 1, jd_input)
     st.success("Job description updated successfully!")
 
+# Candidate Scores Visualization
 st.header("Candidate Scores Distribution")
 worksheet = SHEET.worksheet("sheet1")
 data = worksheet.get_all_records()
@@ -81,6 +91,7 @@ if data:
 else:
     st.warning("No candidate data available for visualization.")
 
+# Candidate Details
 st.header("Candidate Details")
 if st.button("Show Candidates"):
     if data:
