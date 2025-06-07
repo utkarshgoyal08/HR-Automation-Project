@@ -1,0 +1,5 @@
+[connections.gsheets]
+type = "service_account"
+project_id = "hr-form-2"
+spreadsheet = "https://docs.google.com/spreadsheets/d/1RsxXWFv0npNHRm5dX_8wlBbAS7xVTUwhOxmCXwIuTIs"
+worksheet = "Selected Candidate"
